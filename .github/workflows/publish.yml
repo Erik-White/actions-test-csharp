@@ -33,6 +33,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ${{ env.RELEASE_PATH }}/${{ matrix.targetplatform }}/*.exe
+        asset_path: ${{ env.RELEASE_PATH }}/${{ matrix.targetplatform }}/actions-test-csharp.exe
         asset_name: mosey-${{ github.event.release.tag_name }}-${{ matrix.targetplatform }}.exe
         asset_content_type: binary/octet-stream
