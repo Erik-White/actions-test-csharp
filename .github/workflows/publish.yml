@@ -4,29 +4,35 @@ on:
   release:
     types: [created]
 
-strategy:
-  matrix:
-    targetplatform: [x86, x64]
-    targetpath: ./bin/release
-
-runs-on: windows-latest
-
 jobs:
   deploy:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        targetplatform: [x86, x64]
+
+    env:
+      RELEASE_PATH: ./bin/release
+
     steps:
-    - uses: actions/checkout@master
+    - name: Clone repo
+      uses: actions/checkout@master
+
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.200
+
     - name: Build release
-      run: dotnet publish --configuration Release --output ${{ matrix.targetpath }} --framework win-${{ matrix.targetplatform }} -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
+      run: dotnet publish --configuration Release --output ${{ env.RELEASE_PATH }}/${{ matrix.targetplatform }} --runtime win-${{ matrix.targetplatform }} -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
+
     - name: Upload release
       uses: actions/upload-release-asset@v1.0.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ${{ matrix.targetpath }}
-        asset_name: mosey-${{ github.event.release.tag_name }}-${{ matrix.targetplatform }}.exe
+        asset_path: ${{ env.RELEASE_PATH }}/${{ matrix.targetplatform }}/actions-test-csharp.exe
+        asset_name: actions-test-csharp-${{ github.event.release.tag_name }}-${{ matrix.targetplatform }}.exe
         asset_content_type: binary/octet-stream
