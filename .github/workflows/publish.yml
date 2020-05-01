@@ -4,24 +4,29 @@ on:
   release:
     types: [created]
 
-runs-on: windows-latest
-
-strategy:
-  matrix:
-    targetplatform: [x86, x64]
-
 jobs:
   deploy:
-    - env:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        targetplatform: [x86, x64]
+
+    env:
       RELEASE_PATH: ./bin/release
+
     steps:
-    - uses: actions/checkout@master
+    - name: Clone repo
+      uses: actions/checkout@master
+
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.200
+
     - name: Build release
       run: dotnet publish --configuration Release --output $RELEASE_PATH --framework win-${{ matrix.targetplatform }} -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
+
     - name: Upload release
       uses: actions/upload-release-asset@v1.0.2
       env:
